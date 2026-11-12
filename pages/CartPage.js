@@ -3,6 +3,9 @@ export class CartPage {
     this.page = page;
     this.title = page.locator('.page-title h1');
     this.productRows = page.locator('.cart-item-row');
+
+    this.agreeCheckbox = page.locator('#termsofservice');
+    this.checkoutButton = page.locator('#checkout');
   }
 
   getProductRow(productName) {
@@ -23,5 +26,13 @@ export class CartPage {
 
   getQuantityInput(productName) {
     return this.getProductRow(productName).locator('.qty-input');
+  }
+
+  async agreeToTerms() {
+    await this.agreeCheckbox.check();
+  }
+
+  async checkout() {
+    await this.checkoutButton.click();
   }
 }
