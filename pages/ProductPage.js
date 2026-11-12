@@ -18,7 +18,7 @@ export class ProductPage {
     );
 
     this.notification = page.locator('#bar-notification');
-    this.cartLink = page.locator('a.ico-cart');
+    this.cartLink = page.locator('.header-links a.ico-cart');
   }
 
   async openBooksCategory() {
