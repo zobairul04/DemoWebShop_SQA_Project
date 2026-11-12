@@ -1,0 +1,97 @@
+{
+  "info": {
+    "_postman_id": "44255fdf-31d8-40cf-ae85-406ee5a00f8a",
+    "name": "DemoWebShop SQA - API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58674229",
+    "_collection_link": "https://go.postman.co/collection/58674229-44255fdf-31d8-40cf-ae85-406ee5a00f8a?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 - GET All Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Clear values from any earlier request in this run.\r\npm.variables.unset('userId');\r\npm.variables.unset('originalUser');\r\n\r\n// 1. Validate status code.\r\npm.test('GET status code is 200', function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst users = pm.response.json();\r\n\r\n// 2. Validate response type and size.\r\npm.test('Response is a non-empty array', function () {\r\n    pm.expect(users).to.be.an('array').that.is.not.empty;\r\n});\r\n\r\n// 3. Validate information for every user.\r\npm.test('Every user has a valid id, name and email', function () {\r\n    pm.expect(users).to.be.an('array').that.is.not.empty;\r\n\r\n    users.forEach(function (user) {\r\n        pm.expect(user).to.have.property('id');\r\n        pm.expect(user.id).to.be.a('number');\r\n        pm.expect(user.id).to.be.above(0);\r\n\r\n        pm.expect(user).to.have.property('name');\r\n        pm.expect(user.name).to.be.a('string');\r\n        pm.expect(user.name.trim()).to.not.equal('');\r\n\r\n        pm.expect(user).to.have.property('email');\r\n        pm.expect(user.email).to.be.a('string');\r\n        pm.expect(user.email).to.match(/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/);\r\n    });\r\n});\r\n\r\n// 4. Select one user and save local variables.\r\npm.test('Save a selected user ID in a local variable', function () {\r\n    pm.expect(pm.response.code).to.equal(200);\r\n    pm.expect(users).to.be.an('array').that.is.not.empty;\r\n\r\n    const selectedUser = users[0];\r\n\r\n    pm.expect(selectedUser.id).to.be.a('number');\r\n    pm.expect(selectedUser.id).to.be.above(0);\r\n\r\n    pm.variables.set('userId', selectedUser.id);\r\n\r\n    pm.variables.set(\r\n        'originalUser',\r\n        JSON.stringify(selectedUser)\r\n    );\r\n\r\n    pm.expect(pm.variables.get('userId')).to.equal(\r\n        selectedUser.id\r\n    );\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 - PUT Update User",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// When PUT runs alone, fetch a user first.\r\nif (\r\n    !pm.variables.get('userId') ||\r\n    !pm.variables.get('originalUser')\r\n) {\r\n    const response = await pm.sendRequest({\r\n        url: pm.collectionVariables.get('baseUrl') + '/users',\r\n        method: 'GET'\r\n    });\r\n\r\n    pm.test('Setup GET status code is 200', function () {\r\n        pm.expect(response.code).to.equal(200);\r\n    });\r\n\r\n    if (response.code !== 200) {\r\n        throw new Error('Could not fetch users for PUT setup');\r\n    }\r\n\r\n    const users = response.json();\r\n\r\n    pm.test('Setup GET returns a non-empty user array', function () {\r\n        pm.expect(users).to.be.an('array').that.is.not.empty;\r\n\r\n        users.forEach(function (user) {\r\n            pm.expect(user).to.have.property('id');\r\n            pm.expect(user).to.have.property('name');\r\n            pm.expect(user).to.have.property('email');\r\n        });\r\n    });\r\n\r\n    if (!Array.isArray(users) || users.length === 0) {\r\n        throw new Error('No users available for PUT setup');\r\n    }\r\n\r\n    const selectedUser = users[0];\r\n\r\n    pm.variables.set('userId', selectedUser.id);\r\n    pm.variables.set('originalUser', JSON.stringify(selectedUser));\r\n}\r\n\r\n// Read the original user.\r\nconst originalUser = JSON.parse(\r\n    pm.variables.get('originalUser')\r\n);\r\n\r\n// Generate new values for this execution.\r\nconst uniqueValue = pm.variables.replaceIn('{{$guid}}');\r\n\r\nconst updatedName = 'Updated User ' + uniqueValue;\r\nconst updatedEmail = 'updated.' + uniqueValue + '@example.com';\r\nconst updatedCompanyName = 'Updated Company ' + uniqueValue;\r\n\r\npm.variables.set('updatedName', updatedName);\r\npm.variables.set('updatedEmail', updatedEmail);\r\npm.variables.set('updatedCompanyName', updatedCompanyName);\r\n\r\n// Copy all original fields, then change only the required fields.\r\nconst updatedUser = JSON.parse(JSON.stringify(originalUser));\r\n\r\nupdatedUser.name = updatedName;\r\nupdatedUser.email = updatedEmail;\r\nupdatedUser.company.name = updatedCompanyName;\r\n\r\n// Store the complete JSON request body.\r\npm.variables.set('updatedUserBody', JSON.stringify(updatedUser));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('PUT status code is 200', function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\nconst updatedUser = pm.response.json();\r\n\r\nconst originalUser = JSON.parse(\r\n    pm.variables.get('originalUser')\r\n);\r\n\r\npm.test('Returned ID matches the saved user ID', function () {\r\n    pm.expect(updatedUser.id).to.equal(\r\n        Number(pm.variables.get('userId'))\r\n    );\r\n});\r\n\r\npm.test('Phone is not empty and remains unchanged', function () {\r\n    pm.expect(updatedUser.phone).to.be.a('string');\r\n    pm.expect(updatedUser.phone.trim()).to.not.equal('');\r\n    pm.expect(updatedUser.phone).to.equal(originalUser.phone);\r\n});\r\n\r\npm.test('Returned name matches the updated name', function () {\r\n    pm.expect(updatedUser.name).to.equal(\r\n        pm.variables.get('updatedName')\r\n    );\r\n\r\n    pm.expect(updatedUser.name).to.not.equal(originalUser.name);\r\n});\r\n\r\npm.test('Returned email matches the updated email', function () {\r\n    pm.expect(updatedUser.email).to.equal(\r\n        pm.variables.get('updatedEmail')\r\n    );\r\n\r\n    pm.expect(updatedUser.email).to.not.equal(originalUser.email);\r\n});\r\n\r\npm.test('Returned company name matches the updated company name', function () {\r\n    pm.expect(updatedUser.company.name).to.equal(\r\n        pm.variables.get('updatedCompanyName')\r\n    );\r\n\r\n    pm.expect(updatedUser.company.name).to.not.equal(\r\n        originalUser.company.name\r\n    );\r\n});\r\n\r\npm.test('All other user fields remain unchanged', function () {\r\n    const expectedUser = JSON.parse(JSON.stringify(originalUser));\r\n\r\n    expectedUser.name = pm.variables.get('updatedName');\r\n    expectedUser.email = pm.variables.get('updatedEmail');\r\n    expectedUser.company.name = pm.variables.get('updatedCompanyName');\r\n\r\n    pm.expect(updatedUser).to.deep.equal(expectedUser);\r\n});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "\tapplication/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{{updatedUserBody}}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/users/{{userId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "users",
+            "{{userId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}
