@@ -4,13 +4,13 @@ import { rmSync } from 'node:fs';
 const commands = {
   q1: 'npx playwright test tests/01-invalid-login.spec.js',
   q2: 'npx playwright test tests/02-register-cart.spec.js',
+  q3: 'npx playwright test tests/03-checkout.spec.js',
   all: 'npx playwright test',
 };
-
 const selected = process.argv[2] || 'all';
 
 if (!commands[selected]) {
-  console.error('Unknown scenario. Use q1, q2 or all.');
+  console.error('Unknown scenario. Use q1, q2, q3 or all.');
   process.exit(1);
 }
 
