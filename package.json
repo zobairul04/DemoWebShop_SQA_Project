@@ -11,7 +11,11 @@
     "test:q1": "node scripts/run-ui.js q1",
     "test:ui": "node scripts/run-ui.js all",
     "test:q2": "node scripts/run-ui.js q2",
-    "test:q3": "node scripts/run-ui.js q3"
+    "test:q3": "node scripts/run-ui.js q3",
+    "test:api": "node scripts/run-api.js all",
+    "test:api:get": "node scripts/run-api.js get",
+    "test:api:put": "node scripts/run-api.js put",
+    "report:api:open": "allure open reports/api/all/allure-report"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +24,9 @@
   "devDependencies": {
     "@playwright/test": "^1.65.0",
     "allure-commandline": "^2.46.1",
-    "allure-playwright": "^3.14.0"
+    "allure-playwright": "^3.14.0",
+    "newman": "^6.2.3",
+    "newman-reporter-allure": "^3.14.0",
+    "newman-reporter-htmlextra": "^1.23.1"
   }
 }
