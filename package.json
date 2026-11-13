@@ -15,7 +15,8 @@
     "test:api": "node scripts/run-api.js all",
     "test:api:get": "node scripts/run-api.js get",
     "test:api:put": "node scripts/run-api.js put",
-    "report:api:open": "allure open reports/api/all/allure-report"
+    "report:api:open": "allure open reports/api/all/allure-report",
+    "test:all": "node scripts/run-all.js"
   },
   "keywords": [],
   "author": "",
