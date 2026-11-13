@@ -204,7 +204,8 @@ java -version
 ### Step 1: Clone the Repository
 
 ```powershell
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/zobairul04/DemoWebShop_SQA_Project.git
+
 ```
 
 ```powershell
