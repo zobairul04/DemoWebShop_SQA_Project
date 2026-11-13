@@ -1,0 +1,56 @@
+// Clear values from any earlier request in this run.
+pm.variables.unset('userId');
+pm.variables.unset('originalUser');
+
+// 1. Validate status code.
+pm.test('GET status code is 200', function () {
+    pm.response.to.have.status(200);
+});
+
+const users = pm.response.json();
+
+// 2. Validate response type and size.
+pm.test('Response is a non-empty array', function () {
+    pm.expect(users).to.be.an('array').that.is.not.empty;
+});
+
+// 3. Validate information for every user.
+pm.test('Every user has a valid id, name and email', function () {
+    pm.expect(users).to.be.an('array').that.is.not.empty;
+
+    users.forEach(function (user) {
+        pm.expect(user).to.have.property('id');
+        pm.expect(user.id).to.be.a('number');
+        pm.expect(user.id).to.be.above(0);
+
+        pm.expect(user).to.have.property('name');
+        pm.expect(user.name).to.be.a('string');
+        pm.expect(user.name.trim()).to.not.equal('');
+
+        pm.expect(user).to.have.property('email');
+        pm.expect(user.email).to.be.a('string');
+        pm.expect(user.email).to.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+    });
+});
+
+// 4. Select one user and save local variables.
+pm.test('Save a selected user ID in a local variable', function () {
+    pm.expect(pm.response.code).to.equal(200);
+    pm.expect(users).to.be.an('array').that.is.not.empty;
+
+    const selectedUser = users[0];
+
+    pm.expect(selectedUser.id).to.be.a('number');
+    pm.expect(selectedUser.id).to.be.above(0);
+
+    pm.variables.set('userId', selectedUser.id);
+
+    pm.variables.set(
+        'originalUser',
+        JSON.stringify(selectedUser)
+    );
+
+    pm.expect(pm.variables.get('userId')).to.equal(
+        selectedUser.id
+    );
+});

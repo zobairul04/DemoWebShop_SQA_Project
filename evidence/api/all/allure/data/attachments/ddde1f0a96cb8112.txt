@@ -1,0 +1,79 @@
+function prepareUpdate() {
+    const originalUser = JSON.parse(
+        pm.variables.get('originalUser')
+    );
+
+    const uniqueValue = pm.variables.replaceIn('{{$guid}}');
+
+    const updatedName = 'Updated User ' + uniqueValue;
+    const updatedEmail = 'updated.' + uniqueValue + '@example.com';
+    const updatedCompanyName = 'Updated Company ' + uniqueValue;
+
+    pm.variables.set('updatedName', updatedName);
+    pm.variables.set('updatedEmail', updatedEmail);
+    pm.variables.set('updatedCompanyName', updatedCompanyName);
+
+    const updatedUser = JSON.parse(JSON.stringify(originalUser));
+
+    updatedUser.name = updatedName;
+    updatedUser.email = updatedEmail;
+    updatedUser.company.name = updatedCompanyName;
+
+    pm.variables.set(
+        'updatedUserBody',
+        JSON.stringify(updatedUser)
+    );
+}
+
+if (
+    pm.variables.get('userId') &&
+    pm.variables.get('originalUser')
+) {
+    // Use the user saved by GET in the same collection run.
+    prepareUpdate();
+} else {
+    // Fetch a user when PUT runs independently.
+    pm.sendRequest(
+        {
+            url: pm.collectionVariables.get('baseUrl') + '/users',
+            method: 'GET'
+        },
+        function (error, response) {
+            pm.test('Setup GET status code is 200', function () {
+                pm.expect(error).to.equal(null);
+                pm.expect(response.code).to.equal(200);
+            });
+
+            if (error || !response || response.code !== 200) {
+                throw new Error('Could not fetch users for PUT setup');
+            }
+
+            const users = response.json();
+
+            pm.test('Setup GET returns a non-empty user array', function () {
+                pm.expect(users).to.be.an('array').that.is.not.empty;
+
+                users.forEach(function (user) {
+                    pm.expect(user).to.have.property('id');
+                    pm.expect(user).to.have.property('name');
+                    pm.expect(user).to.have.property('email');
+                });
+            });
+
+            if (!Array.isArray(users) || users.length === 0) {
+                throw new Error('No users available for PUT setup');
+            }
+
+            const selectedUser = users[0];
+
+            pm.variables.set('userId', selectedUser.id);
+
+            pm.variables.set(
+                'originalUser',
+                JSON.stringify(selectedUser)
+            );
+
+            prepareUpdate();
+        }
+    );
+}

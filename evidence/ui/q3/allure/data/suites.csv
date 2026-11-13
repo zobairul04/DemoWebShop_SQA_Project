@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","25573","Q3 - Search product and complete an order","","2026-11-13","passed","2026-11-13","","03-checkout.spec.js","",""

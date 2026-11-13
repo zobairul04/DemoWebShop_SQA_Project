@@ -1,0 +1,57 @@
+pm.test('PUT status code is 200', function () {
+    pm.response.to.have.status(200);
+});
+
+const updatedUser = pm.response.json();
+
+const originalUser = JSON.parse(
+    pm.variables.get('originalUser')
+);
+
+pm.test('Returned ID matches the saved user ID', function () {
+    pm.expect(updatedUser.id).to.equal(
+        Number(pm.variables.get('userId'))
+    );
+});
+
+pm.test('Phone is not empty and remains unchanged', function () {
+    pm.expect(updatedUser.phone).to.be.a('string');
+    pm.expect(updatedUser.phone.trim()).to.not.equal('');
+    pm.expect(updatedUser.phone).to.equal(originalUser.phone);
+});
+
+pm.test('Returned name matches the updated name', function () {
+    pm.expect(updatedUser.name).to.equal(
+        pm.variables.get('updatedName')
+    );
+
+    pm.expect(updatedUser.name).to.not.equal(originalUser.name);
+});
+
+pm.test('Returned email matches the updated email', function () {
+    pm.expect(updatedUser.email).to.equal(
+        pm.variables.get('updatedEmail')
+    );
+
+    pm.expect(updatedUser.email).to.not.equal(originalUser.email);
+});
+
+pm.test('Returned company name matches the updated company name', function () {
+    pm.expect(updatedUser.company.name).to.equal(
+        pm.variables.get('updatedCompanyName')
+    );
+
+    pm.expect(updatedUser.company.name).to.not.equal(
+        originalUser.company.name
+    );
+});
+
+pm.test('All other user fields remain unchanged', function () {
+    const expectedUser = JSON.parse(JSON.stringify(originalUser));
+
+    expectedUser.name = pm.variables.get('updatedName');
+    expectedUser.email = pm.variables.get('updatedEmail');
+    expectedUser.company.name = pm.variables.get('updatedCompanyName');
+
+    pm.expect(updatedUser).to.deep.equal(expectedUser);
+});
